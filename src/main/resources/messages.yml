@@ -1,0 +1,69 @@
+# =====================================================================
+#  All player-facing text. MiniMessage format.
+#
+#  Colour language (spec section 6) - please keep this consistent:
+#    white        primary item / player names
+#    green        balance, money received, success
+#    gold         Universal Market prices
+#    aqua         player-shop prices
+#    yellow       deals, warnings, useful notices
+#    red          errors, insufficient funds
+#    gray         secondary info, instructions
+#    dark_purple  rare / prestige only
+# =====================================================================
+
+prefix: '<gray>[<gold>UM<gray>]</gray> '
+
+general:
+  no-permission: '<red>✕ You do not have permission to do that.'
+  player-only: '<red>✕ That command can only be used in game.'
+  unknown-player: '<red>✕ No player named <white>%player%</white>.'
+  reloaded: '<green>✓ UniversalMarket reloaded.</green> <gray>(%count% market entries)'
+  economy-missing: '<red>✕ No Vault economy provider is available. Market disabled.'
+
+terminal:
+  restored: '<green>✓ Market Terminal restored.'
+  already-have: '<gray>You already have your Market Terminal.'
+  duplicates-removed: '<yellow>Removed %count% duplicate terminal(s).</yellow> <gray>You keep exactly one.'
+  no-space: '<red>✕ Your inventory is full - free a slot and run <white>/um terminal</white>.'
+  cannot-drop: '<red>✕ The Market Terminal cannot be dropped.'
+  cannot-store: '<red>✕ The Market Terminal cannot be stored.'
+  cannot-place: '<red>✕ The Market Terminal cannot be placed.'
+  cannot-sell: '<red>✕ The Market Terminal cannot be sold.'
+
+creative:
+  entered: |-
+    <gray>─────────────────────────────
+    <gold>✦ UNIVERSAL MARKET ✦
+    <gray>Press <white>E</white> to browse the market.
+    <gray>Selecting an item buys <white>1</white> of it.
+    <gray>Type <white>/um close</white> to leave.
+    <gray>─────────────────────────────
+  # Action bar HUD. The vanilla hearts/hunger bar is hidden by the client while
+  # it believes it is in creative, so we rebuild it here.
+  hud: '<red>♥ %health%/%maxhealth%  <gray>|  <gold>\U0001F356 %hunger%/20  <gray>|  <green>%balance%  <gray>| <white>x%qty%'
+  exited: '<gray>Left the Universal Market.'
+  bedrock-not-supported: '<yellow>Opening the Bedrock market menu instead.'
+
+buy:
+  success: '<green>✓ Bought <white>%qty%x %item%</white> for <gold>%price%</gold>  <gray>|  <green>%balance%'
+  insufficient: '<red>✕ Insufficient funds.</red> <white>%item%</white> <gray>costs</gray> <gold>%price%</gold> <gray>-</gray> <red>you have %balance%'
+  not-for-sale: '<red>✕ <white>%item%</white> is not sold on the Universal Market.'
+  inventory-full: '<red>✕ Not enough inventory space - nothing was bought or charged.'
+  economy-error: '<red>✕ Economy error - the purchase was cancelled and you were not charged.'
+  rare-limit: '<red>✕ <white>%item%</white> purchase limit reached.</red> <gray>Available again in <yellow>%time%</yellow>.'
+  cheaper-elsewhere: '<yellow>! <white>%owner%</white> sells this for <aqua>%price%</aqua> <gray>- see <white>/um shops</white>'
+
+sell:
+  success: '<green>+ %amount%</green> <gray>for</gray> <white>%qty%x %item%'
+  rejected-custom: '<red>✕ That item has custom data and cannot be sold to the server.'
+  not-accepted: '<red>✕ The server does not buy <white>%item%</white>.'
+  tier-notice: '<yellow>! %item% buyback reduced - current tier: <gold>%rate%</gold> each'
+
+pay:
+  sent: '<green>✓ Sent <white>%amount%</white> to <white>%player%</white></green> <gray>(fee <yellow>%fee%</yellow>, total <white>%total%</white>)'
+  received: '<green>+ %amount%</green> <gray>from</gray> <white>%player%'
+  insufficient: '<red>✕ You need <white>%total%</white> (<gray>%amount% + %fee% fee</gray>) but have <red>%balance%</red>.'
+  self: '<red>✕ You cannot pay yourself.'
+  invalid-amount: '<red>✕ Enter a valid amount, e.g. <white>10000</white>, <white>1.5M</white>, <white>2B</white>.'
+  rollback: '<red>✕ Transfer failed and your money was refunded. Nothing was lost.'

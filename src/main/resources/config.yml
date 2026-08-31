@@ -1,0 +1,176 @@
+# =====================================================================
+#  UniversalMarket - main configuration
+#  Item prices live in market.yml (generated on first start).
+#  Text lives in messages.yml. Contracts live in contracts.yml.
+# =====================================================================
+
+# Verbose logging of packets, price lookups, economy calls and sessions.
+# Leave false on a live server; it is noisy by design.
+debug: false
+
+# ---------------------------------------------------------------------
+# Number formatting (spec section 5)
+# ---------------------------------------------------------------------
+number-format:
+  symbol: '$'
+  # Below this value, show the exact number with commas ($9,500).
+  # At or above it, abbreviate ($145.5K, $18.42M, $500B, $1T).
+  #
+  # NOTE: your spec was internally inconsistent here. Section 5 says the cutover
+  # is 100000, which renders 70,000 as "$70,000". Section 20 writes that same
+  # value as "$70K". 100000 follows the explicit rule in section 5.
+  # Set this to 10000 if you prefer the section 20 look everywhere.
+  abbreviate-at: 100000
+
+# ---------------------------------------------------------------------
+# Economy
+# ---------------------------------------------------------------------
+economy:
+  # Fee charged on player-to-player payments. The SENDER pays it on top;
+  # the recipient receives the exact amount typed (spec section 34).
+  payment-fee-percent: 7.45
+  # Refuse payments to yourself.
+  allow-self-payment: false
+  minimum-payment: 1
+  # Applied once, by us. NewEconomy's own payment fee is NOT used because we
+  # never call its /pay path - we use Vault withdraw/deposit directly.
+
+# ---------------------------------------------------------------------
+# Market Terminal (spec section 7)
+# ---------------------------------------------------------------------
+terminal:
+  material: RECOVERY_COMPASS
+  display-name: '<gold>✦ MARKET TERMINAL ✦'
+  lore:
+    - '<gray>Universal Market Access'
+    - '<gray>Right-click to open'
+    - ''
+    - '<dark_purple>Soulbound'
+    - '<gray>Cannot be dropped or stored'
+  # Hotbar slot to place a new terminal in, if free. -1 to just use any slot.
+  preferred-slot: 8
+  give-on-first-join: true
+  restore-on-respawn: true
+  # There is deliberately NO periodic scan interval here. Adding one is what
+  # caused the old duplication bug. Existence is checked on join, respawn and
+  # /um terminal only. See TerminalService for the full explanation.
+
+# ---------------------------------------------------------------------
+# Creative Market (spec sections 8-14)
+# ---------------------------------------------------------------------
+creative-market:
+  enabled: true
+  # Java players only. Bedrock/PlayStation always get Floodgate forms.
+  bedrock-uses-forms: true
+  hud-refresh-ticks: 10
+  session-timeout-seconds: 600
+  # Minimum gap between two accepted purchase packets, in millis.
+  # This is an anti-duplication gate; do not set it to 0.
+  min-purchase-interval-millis: 200
+  # Default quantity granted per selection. Spec section 13 says ONE.
+  default-purchase-quantity: 1
+  # Allow players to raise session quantity from the menu (1/8/16/32/64).
+  allow-quantity-selector: true
+  # Hard safety switches. Turning any of these off is not supported.
+  lock-player-inventory-during-session: true
+  cancel-block-break: true
+  cancel-block-place: true
+  cancel-entity-damage: true
+  cancel-item-drop: true
+
+# ---------------------------------------------------------------------
+# Player shops / QuickShop (spec sections 29-33)
+# ---------------------------------------------------------------------
+player-shops:
+  enabled: true
+  # Seconds between rebuilds of the shop index. We never query QuickShop per
+  # click; we read its shop manager on a timer and cache.
+  index-refresh-seconds: 60
+  # Warn when a player shop undercuts the Universal Market.
+  warn-on-cheaper-player-shop: true
+  # Remote buying is intentionally NOT implemented. See README limitations.
+  allow-remote-purchase: false
+  show-shop-coordinates: true
+
+# ---------------------------------------------------------------------
+# Dynamic pricing (spec section 22)
+# ---------------------------------------------------------------------
+dynamic-pricing:
+  enabled: true
+  # How far buyback may move from base, as a fraction. Hard floors/ceilings in
+  # market.yml always win over this.
+  max-drift: 0.40
+  # Fraction of the gap recovered per cycle when nothing is being sold.
+  recovery-per-cycle: 0.08
+  # Fraction the price drops per full tier-1 allowance sold.
+  drop-per-allowance: 0.05
+  # Absolute invariant: buyback can never exceed this fraction of the UM buy
+  # price, no matter what deals or demand bonuses say. Blocks arbitrage loops.
+  max-buyback-vs-buy-ratio: 0.60
+
+# ---------------------------------------------------------------------
+# Market cycle, deals, demand (spec sections 24-25)
+# ---------------------------------------------------------------------
+market-cycle:
+  # Real-world hours per cycle.
+  hours: 24
+  daily-deals:
+    count: 9
+    common-discount-min: 0.10
+    common-discount-max: 0.30
+    rare-discount-min: 0.05
+    rare-discount-max: 0.15
+  high-demand:
+    count: 4
+    bonus-min: 0.20
+    bonus-max: 0.45
+
+# ---------------------------------------------------------------------
+# Rare goods (spec section 26)
+# ---------------------------------------------------------------------
+rare-goods:
+  # How the reset window is measured.
+  #   MINECRAFT_DAYS - 7 in-game days (the original design, default)
+  #   REAL_HOURS     - real-world hours
+  reset-mode: MINECRAFT_DAYS
+  reset-minecraft-days: 7
+  reset-real-hours: 168
+  # Limits are always per player, never global.
+
+# ---------------------------------------------------------------------
+# Sell limits / inflation control (spec section 23)
+# ---------------------------------------------------------------------
+sell-limits:
+  enabled: true
+  # These only ever apply to selling TO THE SERVER.
+  # Player-to-player QuickShop trade is never limited.
+  reset-hours: 24
+
+# ---------------------------------------------------------------------
+# Wealth tiers (spec section 37) - prestige display only
+# ---------------------------------------------------------------------
+wealth-tiers:
+  - { name: 'Starter',     threshold: 0,                  color: '<gray>' }
+  - { name: 'Established', threshold: 100000,             color: '<white>' }
+  - { name: 'Wealthy',     threshold: 10000000,           color: '<green>' }
+  - { name: 'Rich',        threshold: 500000000,          color: '<gold>' }
+  - { name: 'Tycoon',      threshold: 50000000000,        color: '<aqua>' }
+  - { name: 'Magnate',     threshold: 500000000000,       color: '<light_purple>' }
+  - { name: 'Legendary',   threshold: 1000000000000,      color: '<dark_purple>' }
+  - { name: 'Mythic',      threshold: 500000000000000,    color: '<dark_purple><bold>' }
+
+# ---------------------------------------------------------------------
+# Storage
+# ---------------------------------------------------------------------
+storage:
+  type: SQLITE
+  file: universalmarket.db
+  # Transaction history retention.
+  transaction-retention-days: 90
+  max-transactions-per-player: 500
+
+leaderboard:
+  refresh-seconds: 120
+  size: 10
+  # Do not count admin-granted money as lifetime earnings.
+  count-admin-grants-as-earnings: false

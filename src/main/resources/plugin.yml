@@ -1,0 +1,64 @@
+name: UniversalMarket
+version: '${project.version}'
+main: com.sola.universalmarket.UniversalMarketPlugin
+api-version: '1.21'
+authors: [Sola]
+description: Universal Market - native creative-inventory browsing, server buyback, QuickShop integration.
+website: https://github.com/
+
+# Paper downloads these at load time so we do not have to shade a JDBC driver
+# into the jar and risk a classloader conflict.
+libraries:
+  - org.xerial:sqlite-jdbc:3.46.1.3
+
+# PacketEvents MUST be loaded before us: we register a packet listener in onEnable.
+depend:
+  - packetevents
+softdepend:
+  - Vault
+  - VaultUnlocked
+  - NewEconomy
+  - QuickShop-Hikari
+  - floodgate
+  - Geyser-Spigot
+loadbefore: []
+
+commands:
+  um:
+    description: Open the Universal Market.
+    usage: /um [help|terminal|price|reload|debug|...]
+    aliases: [universalmarket, market]
+
+permissions:
+  universalmarket.use:
+    description: Open the Universal Market.
+    default: true
+  universalmarket.buy:
+    default: true
+  universalmarket.sell:
+    default: true
+  universalmarket.playershops:
+    default: true
+  universalmarket.pay:
+    default: true
+  universalmarket.contracts:
+    default: true
+  universalmarket.terminal:
+    description: Repair your own terminal.
+    default: true
+  universalmarket.admin:
+    description: All admin functions.
+    default: op
+    children:
+      universalmarket.reload: true
+      universalmarket.debug: true
+      universalmarket.market.reset: true
+      universalmarket.terminal.give: true
+  universalmarket.reload:
+    default: op
+  universalmarket.debug:
+    default: op
+  universalmarket.market.reset:
+    default: op
+  universalmarket.terminal.give:
+    default: op

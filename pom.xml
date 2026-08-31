@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.sola</groupId>
+  <artifactId>UniversalMarket</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>UniversalMarket</name>
+
+  <properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- ============================================================
+         VERSION PINS - edit here, nowhere else.
+         If a build fails to resolve, check these first.
+         ============================================================ -->
+    <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+    <packetevents.version>2.13.0</packetevents.version>
+    <floodgate.version>2.2.5-SNAPSHOT</floodgate.version>
+    <vaultapi.version>1.7.1</vaultapi.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+    <repository>
+      <!-- PacketEvents 2.x is published here by retrooper -->
+      <id>codemc-releases</id>
+      <url>https://repo.codemc.io/repository/maven-releases/</url>
+    </repository>
+    <repository>
+      <!-- Floodgate / Cumulus -->
+      <id>opencollab-snapshots</id>
+      <url>https://repo.opencollab.dev/main/</url>
+    </repository>
+    <repository>
+      <!-- VaultAPI (legacy interface, which VaultUnlocked still registers) -->
+      <id>jitpack</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Real Paper API. NEVER replace this with hand-written stubs.
+         This is what guarantees ItemStack#setItemMeta / Inventory#addItem
+         resolve to the exact descriptors the server actually ships. -->
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>${paper.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Legacy Vault Economy interface.
+         VaultUnlocked 2.x registers this service, and NewEconomy provides it.
+         We deliberately target net.milkbowl.vault.economy.Economy because it is
+         the interface QuickShop's "BuiltIn-Vault" bridge also uses, so we and
+         QuickShop see identical balances. -->
+    <dependency>
+      <groupId>com.github.MilkBowl</groupId>
+      <artifactId>VaultAPI</artifactId>
+      <version>${vaultapi.version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bukkit</groupId>
+          <artifactId>bukkit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- PacketEvents 2.13.0. NOT shaded: it is installed as a server plugin. -->
+    <dependency>
+      <groupId>com.github.retrooper</groupId>
+      <artifactId>packetevents-spigot</artifactId>
+      <version>${packetevents.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Floodgate API (pulls Cumulus transitively) for Bedrock form menus. -->
+    <dependency>
+      <groupId>org.geysermc.floodgate</groupId>
+      <artifactId>api</artifactId>
+      <version>${floodgate.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--
+      NOTE ON QUICKSHOP-HIKARI:
+      There is deliberately NO quickshop-api compile dependency.
+      QuickShop 6.3.0.1's Shop type is a generic `Shop<U, L>` split across
+      ShopMeta<U>/ShopInventory/ShopTrading/Locatable<L>, and that shape changed
+      between 6.2.x, 6.3.x and 6.4.x. Binding it at compile time is exactly how
+      you get NoSuchMethodError after a QuickShop update.
+      QuickShopAdapter binds reflectively at runtime, logs precisely what it
+      bound, and cleanly disables Player Shops if anything is missing.
+      It only ever READS shop data - it never performs remote transactions.
+    -->
+  </dependencies>
+
+  <build>
+    <finalName>UniversalMarket</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes><include>plugin.yml</include></includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes><exclude>plugin.yml</exclude></excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>${java.version}</release>
+          <compilerArgs><arg>-Xlint:-deprecation,-unchecked</arg></compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
